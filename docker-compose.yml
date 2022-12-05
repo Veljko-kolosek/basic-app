@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: ubuntu
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis:/var/lib/redis/data
+  elasticsearch:
+    image: elasticsearch:7.3.1
+    restart: always
+    environment:
+      - discovery.type=single-node
+    ports:
+      - '9200:9200'
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+  web:
+    build: .
+    command: bash -c "bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/basic-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+volumes:
+  postgres:
+  redis:
+  elasticsearch:
