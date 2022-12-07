@@ -1,0 +1,11 @@
+FROM bitnami/minideb:stretch
+
+RUN apt-get update -q && \
+    apt-get install -qy procps curl ca-certificates gnupg2 build-essential --no-install-recommends && apt-get clean
+
+RUN echo 'Going to install redis'
+RUN apt install lsb-release -y
+RUN curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
+RUN apt-get install redis-server -y
+
