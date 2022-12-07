@@ -1,0 +1,37 @@
+FROM debian
+
+RUN apt-get update -q && \
+    apt-get install -qy procps curl ca-certificates gnupg2 build-essential --no-install-recommends && apt-get clean
+
+RUN echo 'Going to install ruby version manager'
+RUN curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
+RUN curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -
+RUN curl -sSL https://get.rvm.io | bash -s stable
+
+RUN echo 'Going to install ruby:2.7.6'
+RUN bash -c "source /etc/profile.d/rvm.sh && rvm install 2.7.6"
+
+
+RUN echo 'Going to install redis'
+RUN apt install lsb-release -y
+RUN curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+
+RUN echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
+
+RUN apt-get install redis -y
+
+RUN echo 'Going to install imagemagick'
+RUN apt install imagemagick -y
+
+
+RUN echo 'Going go install elasticsearch'
+RUN apt-get install -y wget
+RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+RUN apt-get install apt-transport-https
+RUN echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list
+RUN apt-get update && apt-get install elasticsearch
+
+RUN echo 'Going to install postgresql'
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN apt-get install postgresql postgresql-client -y
